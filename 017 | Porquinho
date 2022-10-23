@@ -1,0 +1,206 @@
+enum Cents {
+    C10,
+    C25,
+    C50,
+    C100
+}
+
+class Coin {
+    private value: number;
+    private volume: number;
+    private label: string;
+    
+    public constructor(cents: Cents) {
+      switch(cents) {
+        case Cents.C10:
+          this.value = 0.10;
+          this.volume = 1;
+          this.label = "C10";
+          break;
+        case Cents.C25:
+          this.value = 0.25;
+          this.volume = 2;
+          this.label = "C25";
+          break;
+        case Cents.C50:
+          this.value = 0.50;
+          this.volume = 3;
+          this.label = "C50";
+          break;
+      }
+    }
+    public toString(): string { 
+      return "value: $" + this.value + ", " +
+        "volume: $" + this.volume + ", " +
+        "label: $" + this.label;
+    }
+    public getValue(): number { 
+      return this.value;
+    }
+    public getVolume(): number { 
+      return this.volume;
+    }
+    public getLabel(): string { 
+      return this.label;
+    }
+}
+
+
+class Item {
+    private label: string;
+    private volume: number;
+
+    public constructor(label: string, volume: number) { 
+      this.label = label;
+      this.volume = volume;
+    }
+    public getLabel(): string {
+      return this.label;
+    }
+    public getVolume(): number { 
+      return this.volume;
+    }
+    public setVolume(volume: number): void { 
+      this.volume = volume;
+    }
+    public setLabel(label: string): void {
+      this.label = label;
+    }
+    public toString(): string { 
+      return this.label + ":" + this.volume;
+    }
+}
+
+class Pig { 
+    private items: string[];
+    private volumeMax: number;
+    private volume: number;
+    private value: number;
+    private broken: boolean;
+
+    public constructor(volumeMax: number) { 
+      this.items = new Array<string>();
+      this.volumeMax = volumeMax;
+      this.volume = 0;
+      this.value = 0;
+      this.broken = false;
+    }
+
+    public addItem(item: Item): boolean { 
+      if(this.broken){
+        console.log("fail: the pig is broken");
+        return false;
+      }
+      if(item.getVolume() + this.volume > this.volumeMax) {
+        console.log("fail: the pig is full");
+        return false;
+      }
+      this.volume += (item.getVolume());
+      this.items.push(item.getLabel());
+    }
+
+    public addCoin(coin: Coin): boolean { 
+      if (this.broken) {
+        console.log("fail: the pig is broken");
+        return false;
+      } 
+      if (coin.getVolume() + this.volume > this.volumeMax) {
+        console.log("fail: the pig is full");
+        return false;
+      } 
+        this.value += coin.getValue();
+        this.volume += coin.getVolume();
+        return true; 
+    }
+
+    public breakPig(): boolean {
+      this.volume = 0;
+      this.broken = true;
+    }
+
+    public getCoins() : number {
+      if(!this.broken) {
+        console.log("fail: you must break the pig first");
+        return 0
+      } else {
+        let aux = this.value;
+        this.value = 0;
+        return aux;
+      }
+    }
+
+    public getItems(): string {
+      if(!this.broken) {
+        console.log("fail: you must break the pig first");
+        return "[]"
+      } else {
+        let aux = "[" + this.items.join(", ") + "]";
+        this.items = [];
+        return aux;
+      }
+    }
+
+    public toString(): string {
+      let saida = "";
+        saida += "[" + this.items.join(", ") + "]";
+        saida +=  " : " + this.value.toFixed(2) + "$ : " 
+        saida += this.volume + "/" + this.volumeMax 
+        if(this.broken){
+         saida += " : broken";
+        } else {
+          saida += " : unbroken"
+        }
+      return saida;
+    }
+}
+
+function main() {
+    let chain = new Map();
+    let param: string[] = [];
+    let pig = new Pig(0);
+
+
+    chain.set("addCoin", () => {
+        if      (param[1] == "10") pig.addCoin(new Coin(Cents.C10));
+        else if (param[1] == "25") pig.addCoin(new Coin(Cents.C25));
+        else if (param[1] == "50") pig.addCoin(new Coin(Cents.C50));
+    });
+    chain.set("init",     () => pig = new Pig(+param[1])               );
+    chain.set("addItem",  () => pig.addItem(new Item(param[1], +param[2])));
+    chain.set("break",    () => pig.breakPig()                      );
+    chain.set("getCoins", () => puts(pig.getCoins().toFixed(2))     );
+    chain.set("getItems", () => puts(pig.getItems())                );
+    chain.set("show",     () => puts(pig.toString())                );
+
+    evaluate(chain, param);
+}
+
+import { readFileSync } from "fs";
+
+let __lines = readFileSync(0).toString().split("\n");
+let input = () => { 
+    let a = __lines.shift(); 
+    return a === undefined ? "" : a; 
+};
+let write = (text: any) => process.stdout.write("" + text);
+let puts = (text: any) => console.log(text);
+
+function evaluate(chain: Map<string, Function>, ui: string[]) {
+    while (true) {
+        let line = input();
+        puts("$" + line);
+        ui.splice(0); //apagar tudo
+        line.split(" ").forEach((x: string) => ui.push(x));
+
+        let cmd = ui[0];
+        if (cmd == "end") {
+            return;
+        } else if (chain.has(cmd)) {
+            chain.get(cmd)!();
+        } else {
+            puts("fail: command not found");
+        }
+    }
+}
+
+main()
