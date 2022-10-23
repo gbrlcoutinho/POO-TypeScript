@@ -1,0 +1,120 @@
+class Time { 
+    private hour: number = 0;
+    private minute: number = 0;
+    private second: number = 0;
+
+    constructor(hour: number, minute: number, second: number) {
+      this.setHour(hour);
+      this.setMinute(minute);
+      this.setSecond(second);
+    }
+
+    setHour(hour: number): void { 
+      if(hour < 24) {
+        this.hour = hour;
+        return this.hour
+      } else {
+        return console.log("fail: hora invalida");
+      }
+    }
+
+    setMinute(minute: number): void { 
+       if(minute < 60) {
+        this.minute = minute;
+         return this.minute;
+      } else {
+        return console.log("fail: minuto invalido");
+      }
+    }
+
+    setSecond(second: number): void {
+       if(second < 60) {
+        this.second = second
+        return this.second;
+      } else {
+       
+         return console.log("fail: segundo invalido");
+      }
+    }
+
+    getHour(): number { 
+      return this.hour;
+    }
+
+    getMinute(): number {
+      return this.minute;
+    }
+
+    getSecond(): number { 
+      return this.second;
+    }
+
+    nextSecond(): void { 
+      this.second += 1;
+      if(this.second > 59){
+        this.second = 0;
+        this.minute += 1;
+        if(this.minute > 59) {
+          this.minute = 0;
+          this.hour += 1;
+          if(this.hour > 23){
+            this.hour = 0;
+          } 
+        }
+      } 
+    }
+  toString() {
+        let p2 = n => ("" + n).padStart(2, "0");
+        return p2(this.hour) + ":" + p2(this.minute) + ":" +         
+        p2(this.second);
+    }
+}
+      
+   
+
+
+function main() {
+    let chain = new Map();
+    let param: string[] = [];
+    let time = new Time(0, 0, 0);
+
+    chain.set("set", () => {
+        time.setHour(+param[1]);
+        time.setMinute(+param[2]); 
+        time.setSecond(+param[3]);
+    });
+    chain.set("init", () => { time = new Time(+param[1], +param[2], +param[3]); });
+    chain.set("show", () => { puts(time.toString()); });
+    chain.set("next", () => {      time.nextSecond();});
+    evaluate(chain, param);
+}
+
+import { readFileSync } from "fs";
+
+let __lines = readFileSync(0).toString().split("\n");
+let input = () => { 
+    let a = __lines.shift(); 
+    return a === undefined ? "" : a; 
+};
+let write = (text: any) => process.stdout.write("" + text);
+let puts = (text: any) => console.log(text);
+function evaluate(chain: Map<string, Function>, param: string[]) {
+    while (true) {
+        let line = input();
+        puts("$" + line);
+        param.splice(0); //apagar tudo
+        line.split(" ").forEach((x: string) => param.push(x));
+
+        let cmd = param[0];
+        if (cmd == "end") {
+            return;
+        } else if (chain.has(cmd)) {
+            chain.get(cmd)!();
+        } else {
+            puts("fail: command not found");
+        }
+    }
+}
+
+main()
+
