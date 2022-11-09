@@ -1,0 +1,136 @@
+import {evaluate, puts} from "./shell";
+
+function to_vet(token: string): number[] {
+    let size = token.length;
+    let inside = token.substring(1, size - 1);
+    return inside === "" ? [] : inside.split(",").map(x => +x)
+}
+
+function count(vet: number[], value: number): number {
+  let cont = 0;
+  for(let i = 0; i < vet.length; i++) {
+    if(vet[i] === value){
+      cont++
+    }    
+  }
+  return cont;
+}
+
+function sum(vet: number[]): number { 
+  let soma = 0;
+  for(let i = 0; i < vet.length; i++) {
+    soma += Math.abs(vet[i]);
+  }
+  return soma;
+}
+
+function average(vet: number[]): number {
+  let soma = 0
+  let avrg = 0;
+  for(let i = 0; i < vet.length; i++) {
+    soma += Math.abs(vet[i]);
+    avrg = soma / vet.length;
+  }
+  return avrg;
+}
+
+function more_men(vet: number[]): string {
+  let contm = 0;
+  let contw = 0;
+  for(let i = 0; i < vet.length; i++){
+    if(vet[i] < 0) {
+      contw++;
+    } 
+    else {
+      contm++
+    }
+  }
+
+  if(contm > contw) {
+    return "men";
+  } else if(contw > contm) {
+   return "women"; 
+  } else {
+    return "draw";
+  }
+}
+
+function half_compare(vet: number[]): string {
+  let aa = vet.length / 2;
+  let bb = Math.floor(vet.length / 2);
+  let soma = 0;
+  let soma2 = 0;
+
+  if(vet.length / 2 % 0){
+    for(let i = 0; i < aa; i++){
+      soma += Math.abs(vet[i]);
+    }
+    for(let j = aa; j < vet.length; j++){
+      soma2 += Math.abs(vet[j]);
+    }
+  } else {
+    for(let i = 0; i < bb; i++){
+      soma += Math.abs(vet[i]);
+    }
+    for(let j = bb; j < vet.length; j++){
+      soma2 += Math.abs(vet[j]);
+    }
+  }
+
+  if(soma > soma2) {
+    return "first";
+  } else if(soma2 > soma) {
+    return "second";
+  } else {
+    return "draw";
+  }
+}
+
+function sex_battle(vet: number[]): string {
+  let somam = 0;
+  let mediam = 0;
+  let contm = 0;
+  let somaw = 0;
+  let mediaw = 0;
+  let contw = 0;
+  let nonbinary = 0;
+
+  for(let i = 0; i < vet.length; i++) {
+    if(vet[i] < 0) {
+      somaw += Math.abs(vet[i]);
+      contw++;
+    } else if(vet[i] > 0) {
+      somam += vet[i];
+      contm++;
+    }
+  }
+  mediam = somam / contm;
+  mediaw = somaw / contw;
+
+  if(mediam > mediaw){
+    return "men";
+  } else if(mediam < mediaw) {
+    return "women";
+  } else {
+    return "draw";
+  }
+}
+
+
+// -------------------------- MAIN --------------------------
+
+function main() {
+    let chain = new Map();
+    let ui: string[] = [];
+
+    chain.set("count",        () => puts(       count(to_vet(ui[1]), +ui[2])   ));
+    chain.set("sum",          () => puts(         sum(to_vet(ui[1]))           ));
+    chain.set("average",      () => puts(     average(to_vet(ui[1])).toFixed(2)));
+    chain.set("more_men",     () => puts(    more_men(to_vet(ui[1]))           ));
+    chain.set("half_compare", () => puts(half_compare(to_vet(ui[1]))           ));
+    chain.set("sex_battle",   () => puts(  sex_battle(to_vet(ui[1]))           ));
+
+    evaluate(chain, ui);
+}
+
+main()
