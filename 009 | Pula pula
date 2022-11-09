@@ -1,0 +1,47 @@
+import {evaluate, puts, write} from "./shell";
+
+class Kid {
+  private name: string;
+  private age: number
+
+  public constructor (name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public getAge(): number {
+    return this.age;
+  }
+
+  public setName(name: string): void {
+    this.name = name;
+  }
+
+  public setAge(age: number): void {
+    this.age = age;
+  }
+
+  public toString(): string {
+    return this.name + ":" + this.age;
+  }
+}
+
+function main() { 
+    let chain = new Map();
+    let param: string[] = [];
+    let pet = new Pet(0, 0, 0);
+    chain.set("init",   () => pet = new Pet(+param[1], +param[2], +param[3]));
+    chain.set("show",   () => puts(pet.toString()));
+    chain.set("play",   () => pet.play());
+    chain.set("clean",  () => pet.shower());
+    chain.set("eat",    () => pet.eat());
+    chain.set("sleep",  () => pet.sleep());
+
+    evaluate(chain, param);
+};
+
+main()
