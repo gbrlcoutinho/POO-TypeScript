@@ -1,0 +1,96 @@
+import {evaluate, puts} from "./shell";
+
+class Pessoa {
+  private nome: string;
+
+  public constructor(nome: string) {
+    this.nome = nome;
+  }
+
+  public toString(): string {
+    return this.nome;
+  }
+  
+  public getName(): string {
+    return this.nome;
+  } 
+  
+  public setName(nome: string) {
+    this.nome = nome;
+  }
+}
+
+class Budega {
+  private caixas: Array<Pessoa | null>;
+  private espera: Array<Pessoa>;
+
+  public constructor(qntCaixas: number) {
+    this.caixas = [];
+    this.espera = [];
+    for(let i = 0; i < qntCaixas; i++) {
+      this.caixas.push(null);  
+    }
+  }
+
+  public arrive(pessoa: Pessoa) {
+   this.espera.push(pessoa)
+  }
+
+  public call(index: num){
+    if(this.caixas[index] == null) {
+      this.caixas[index] = this.espera[0];
+      this.espera.shift();
+    }else if (this.espera.length === 0) {
+      console.log("fail: sem clientes");
+    } else {
+      console.log("fail: caixa ocupado");
+      return;
+    }
+  }
+
+  public finish(){
+    for(let i = 0; i < this.caixas.length; i++) {
+      if(this.caixas[i] !== null) {
+        this.caixas[i] = null
+      } else if(this.caixas[i] === null){
+       console.log("fail: caixa vazio");
+      }else if (i < this.caixas.length) {
+        console.log("fail: caixa inexistente");
+      }
+    } 
+  }
+
+  public toString(pessoa: Pessoa): string {
+    let saida = "";
+    saida += "Caixas: |"
+    for(let i = 0; i < this.caixas.length; i++) {
+      if(this.caixas[i] == null) {
+        saida += " "+ i + ":" + "----- |"
+      } else {
+        saida += " "+ i + ":" + " " + this.caixas[i] + " |"
+      }
+    } 
+    
+    if(this.espera != []){ 
+      saida += "\nEspera: [" + this.espera.join(", ") + "]";
+    } else {
+      saida += "\nEspera: [" + this.espera + "]";
+    }
+    return saida;
+  }
+}
+
+function main() { 
+    let chain = new Map();
+    let param: string[] = [];
+    let budega = new Budega(2);
+    chain.set("init",   () => budega = new Budega(+param[1]));
+    chain.set("show",   () => puts(budega.toString()));
+    chain.set("arrive",   () => budega.arrive(new Pessoa(param[1])));
+    chain.set("call",  () => budega.call(+param[1]));
+    chain.set("finish",    () => budega.finish());
+
+    evaluate(chain, param);
+}
+
+main()
