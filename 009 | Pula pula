@@ -30,14 +30,49 @@ class Kid {
   }
 }
 
+class Trampoline {
+  private waiting: Array<Kid | null>;
+  private playing: Array<Kid>;
+
+  public constructor() {
+    this.waiting = [];
+    this.playing = [];
+  }
+
+  public arrive(kid: Kid) {
+    this.waiting.unshift(kid);
+  }
+
+  public remove(name: string, list: Array<Kid>) {
+    
+  }
+
+  public enter () {
+    
+  }
+  
+  public leave() {
+    
+  }
+
+  public remotedKid(name: string): Kid {
+    
+  }
+
+  public toString(): string {
+    return "[" + this.
+  }
+}
+
 function main() { 
     let chain = new Map();
     let param: string[] = [];
-    let pet = new Pet(0, 0, 0);
-    chain.set("init",   () => pet = new Pet(+param[1], +param[2], +param[3]));
-    chain.set("show",   () => puts(pet.toString()));
-    chain.set("play",   () => pet.play());
-    chain.set("clean",  () => pet.shower());
+    let trampoline = new Trampoline();
+  
+    chain.set("init",   () => trampoline = new Trampoline());
+    chain.set("show",   () => puts(trampoline.toString()));
+    chain.set("arrive", () => trampoline.arrive(new Kid(param[1], param[2])));
+    chain.set("remove",  () => trampoline.remove());
     chain.set("eat",    () => pet.eat());
     chain.set("sleep",  () => pet.sleep());
 
