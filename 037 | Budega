@@ -1,7 +1,5 @@
 import {evaluate, puts} from "./shell";
 
-//Problema: no método finish não imprime o "fail: caixa inxistente";
-
 class Pessoa {
   private nome: string;
 
@@ -50,7 +48,7 @@ class Budega {
   }
 
   public finish(index: num){ 
-    if(index < 0 || index > this.caixas.length){
+    if(index < 0 || index >= this.caixas.length){
       console.log("fail: caixa inexistente");
     } else if(this.caixas[index] == null) {
       console.log("fail: caixa vazio");
