@@ -1,5 +1,7 @@
 import {evaluate, puts} from "./shell";
 
+//Problema: no método finish não imprime o "fail: caixa inxistente";
+
 class Pessoa {
   private nome: string;
 
@@ -36,30 +38,27 @@ class Budega {
    this.espera.push(pessoa)
   }
 
-  public call(index: num){
-    if(this.caixas[index] == null) {
+  public call(index: num) {
+    if(this.espera.length == 0) {
+      console.log("fail: sem clientes");
+    } else if(this.caixas[index] !== null) { 
+      console.log("fail: caixa ocupado");
+    } else if(this.caixas[index] == null) {
       this.caixas[index] = this.espera[0];
       this.espera.shift();
-    }else if (this.espera.length === 0) {
-      console.log("fail: sem clientes");
-    } else {
-      console.log("fail: caixa ocupado");
-      return;
     }
   }
 
-  public finish(){
-    for(let i = 0; i < this.caixas.length; i++) {
-      if(this.caixas[i] !== null) {
-        this.caixas[i] = null
-      } else if(this.caixas[i] === null){
-       console.log("fail: caixa vazio");
-      }else if (i < this.caixas.length) {
-        console.log("fail: caixa inexistente");
-      }
-    } 
-  }
-
+  public finish(index: num){ 
+    if(index < 0 || index > this.caixas.length){
+      console.log("fail: caixa inexistente");
+    } else if(this.caixas[index] == null) {
+      console.log("fail: caixa vazio");
+    } else {
+      this.caixas[index] = null;
+    }
+}
+  
   public toString(pessoa: Pessoa): string {
     let saida = "";
     saida += "Caixas: |"
@@ -70,25 +69,21 @@ class Budega {
         saida += " "+ i + ":" + " " + this.caixas[i] + " |"
       }
     } 
-    
-    if(this.espera != []){ 
-      saida += "\nEspera: [" + this.espera.join(", ") + "]";
-    } else {
-      saida += "\nEspera: [" + this.espera + "]";
-    }
+    saida += "\nEspera: [" + this.espera.join(", ") + "]";
     return saida;
   }
 }
+
 
 function main() { 
     let chain = new Map();
     let param: string[] = [];
     let budega = new Budega(2);
-    chain.set("init",   () => budega = new Budega(+param[1]));
-    chain.set("show",   () => puts(budega.toString()));
-    chain.set("arrive",   () => budega.arrive(new Pessoa(param[1])));
+    chain.set("init",  () => budega = new Budega(+param[1]));
+    chain.set("show",  () => puts(budega.toString()));
+    chain.set("arrive",() => budega.arrive(new Pessoa(param[1])));
     chain.set("call",  () => budega.call(+param[1]));
-    chain.set("finish",    () => budega.finish());
+    chain.set("finish",() => budega.finish(param[1]));
 
     evaluate(chain, param);
 }
