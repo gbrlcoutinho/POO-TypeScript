@@ -1,3 +1,10 @@
+// ------------RELATÓRIO---------------
+1. Consegui fazer passar em todos os testes.
+2. Se fez sozinho ou se fez com alguém(quem) e como foi a divisão do trabalho.
+3. Aprendi, pois consegui fazer questões que usavam o que esta questão ensinou.
+4. Levei um tempinho considerável para entender a questão e como funcionava para resolvê-la(talvez uns dois dias lendo e relendo).
+   Depois que entendi consegui resolver a questão em 2h.
+// --------------CÓDIGO----------------
 class Calculator { 
     batteryMax: number;
     battery: number;
