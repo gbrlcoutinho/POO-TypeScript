@@ -53,6 +53,7 @@ function find_min_if(vet: number[]): number {
 
 
 
+
 // -------------------------- MAIN --------------------------
 
 function main() {
@@ -77,3 +78,4 @@ function to_vet(token: string): number[] {
 }
 
 main()
+
