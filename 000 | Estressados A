@@ -1,3 +1,9 @@
+// ------------RELATÓRIO---------------
+1. Consegui fazer passar em todos os testes.
+2. Se fez sozinho ou se fez com alguém(quem) e como foi a divisão do trabalho.
+3. Aprendi, pois sinto que conseguiria fazer um exercício igual ou parecido sem problemas.
+4. No total devo ter levado 3 horas para passar em todos os testes.
+// --------------CÓDIGO----------------
 import {evaluate, puts} from "./shell";
 
 function inside(vet: number[], value: number): boolean {
