@@ -1,0 +1,149 @@
+class Client {
+  private id: string;
+  private fone: string;
+
+  public constructor(id: string, fone: string) {
+    this.id = id;
+    this.fone = fone;
+  }
+
+  public toString(): string {
+    return this.id + ":" + this.fone;
+  }
+
+  public getId(): string {
+    return this.id;
+  }
+
+  public setId(id: string): void {
+    this.id = id;
+  }
+
+  public getFone() {
+    return this.fone;
+  }
+
+  public setFone(fone: string): void {
+    this.fone = fone;
+  }
+}
+
+class Sala {
+  private seat: Array<any> = [];
+
+  public constructor(capacidade: number) {
+    for (let i = 0; i < capacidade; i++) {
+      this.seat.push(null)
+    }
+  }
+
+  public find(nome: string): number {
+    for (let i = 0; i < this.seat.length; i++) {
+      if (this.seat[i] !== null) {
+        if (this.seat[i].getId() === nome) {
+          return i;
+        }
+      }
+    }
+    return -1;
+  }
+
+  public verifyIndex(index: number): boolean {
+    if (index >= this.seat.length) {
+      return true;
+    }
+    return false;
+  }
+
+  public reservar(id: string, fone: string, index: number): boolean {
+    let client = new Client(id, fone);
+    if (this.verifyIndex(index) == true) {
+      console.log("fail: cadeira nao existe");
+    }
+    else {
+      if (this.seat[index] !== null) {
+        console.log("fail: cadeira ja esta ocupada");
+        return false;
+      } else {
+        if (this.find(id) !== -1) {
+          console.log("fail: cliente ja esta no cinema");
+          return false;
+        }
+      }
+      this.seat.splice(index, 1, client);
+      return true;
+    }
+  }
+
+  public cancelar(id: string) {
+    if (this.find(id) !== -1) {
+      this.seat[this.find(id)] = null;
+    } else {
+      console.log("fail: cliente nao esta no cinema");
+    }
+  }
+
+  public toString(): string {
+    let saida = "[";
+    for (let i = 0; i < this.seat.length; i++) {
+      if (this.seat[i] === null && i === 0) {
+        saida += "-";
+      }
+      else if (this.seat[i] === null && i > 0) {
+        saida += " -";
+      }
+      else if (this.seat[i] !== null && i === 0) {
+        saida += this.seat[i];
+      }
+      else if (this.seat[i] !== null && i > 0) {
+        saida += " " + this.seat[i];
+      }
+    }
+    saida += "]";
+    return saida;
+  }
+}
+
+function main() {
+  let chain = new Map();
+  let param: string[] = [];
+  let sala = new Sala(+param[1]);
+
+  chain.set("init", () => { sala = new Sala(+param[1]) });
+  chain.set("reservar", () => { sala.reservar(param[1], param[2], +param[3]) });
+  chain.set("cancelar", () => { sala.cancelar(param[1]) });
+  chain.set("show", () => { console.log(sala.toString()) });
+
+  evaluate(chain, param);
+}
+
+import { readFileSync } from "fs";
+
+let __lines = readFileSync(0).toString().split("\n");
+let input = () => {
+  let a = __lines.shift();
+  return a === undefined ? "" : a;
+};
+export let write = (text: any) => process.stdout.write("" + text);
+export let puts = (text: any) => console.log(text);
+
+export function evaluate(chain: Map<string, Function>, ui: string[]) {
+  while (true) {
+    let line = input();
+    puts("$" + line);
+    ui.splice(0); //apagar tudo
+    line.split(" ").forEach((x: string) => ui.push(x));
+
+    let cmd = ui[0];
+    if (cmd == "end") {
+      return;
+    } else if (chain.has(cmd)) {
+      chain.get(cmd)!();
+    } else {
+      puts("fail: command not found");
+    }
+  }
+}
+
+
+main()
