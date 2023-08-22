@@ -1,0 +1,186 @@
+class Pass {
+  private name: string;
+  private age: number;
+
+  public constructor(name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
+
+  public isPriority(): boolean {
+    if (this.age >= 65) {
+      return true;
+    }
+    return false;
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public getAge(): number {
+    return this.age;
+  }
+
+  public toString(): string {
+    return this.name + ":" + this.age;
+  }
+}
+
+class Topic {
+  private prioritySeats: Array<Pass | null> = [];
+  private seats: Array<Pass | null> = [];
+
+  public constructor(capacity: number, qntPriority: number) {
+    for (let i = 0; i < qntPriority; i++) {
+      this.prioritySeats.push(null);
+    }
+    for (let o = 0; o < capacity - qntPriority; o++) {
+      this.seats.push(null);
+    }
+  }
+
+  public in(pass: Pass): boolean {
+    for (let i = 0; i < this.prioritySeats.length; i++) {
+      if (pass.getName() === this.prioritySeats[i]?.getName()) {
+        console.log("fail: " + pass.getName() + " ja esta na topic");
+        return false
+      }
+    }
+    for (let i = 0; i < this.seats.length; i++) {
+      if (pass.getName() === this.seats[i]?.getName()) {
+        console.log("fail: " + pass.getName() + "ja esta na topic");
+        return false
+      }
+    }
+
+
+
+    if (pass.isPriority()) {
+      for (let i = 0; i < this.prioritySeats.length; i++) {
+        if (this.prioritySeats[i] === null) {
+          this.prioritySeats[i] = pass;
+          return true;
+        }
+      }
+      for (let i = 0; i < this.seats.length; i++) {
+        if (this.seats[i] === null) {
+          this.seats[i] = pass;
+          return true;
+        }
+      }
+    } else {
+      for (let i = 0; i < this.seats.length; i++) {
+        if (this.seats[i] === null) {
+          this.seats[i] = pass;
+          return true;
+        }
+      }
+      for (let i = 0; i < this.prioritySeats.length; i++) {
+        if (this.prioritySeats[i] === null) {
+          this.prioritySeats[i] = pass;
+          return true;
+        }
+      }
+    }
+    console.log("fail: topic lotada");
+    return false;
+  }
+
+  public out(name: string): boolean {
+    for (let i = 0; i < this.prioritySeats.length; i++) {
+      if (this.prioritySeats[i] !== null) {
+        if (this.prioritySeats[i]?.getName() == name) {
+          this.prioritySeats[i] = null;
+          return true;
+        }
+      }
+    }
+    for (let i = 0; i < this.seats.length; i++) {
+      if (this.seats[i] !== null) {
+        if (this.seats[i]!.getName() == name) {
+          this.seats[i] = null;
+          return true;
+        }
+      }
+    }
+    console.log("fail: " + name + " nao esta na topic");
+    return false;
+  }
+
+  public toString(): string {
+    let saida = "[";
+    for (let i = 0; i < this.prioritySeats.length; i++) {
+      if (this.prioritySeats[i] === null && i === 0) {
+        saida += "@";
+      }
+      else if (this.prioritySeats[i] === null && i > 0) {
+        saida += " @";
+      }
+      else if (this.prioritySeats[i] !== null && i === 0) {
+        saida += "@" + this.prioritySeats[i];
+      }
+      else if (this.prioritySeats[i] !== null && i !== 0) {
+        saida += " @" + this.prioritySeats[i];
+      }
+    }
+
+    for (let i = 0; i < this.seats.length; i++) {
+      if (this.seats[i] === null && i === 0) {
+        saida += " =";
+      }
+      else if (this.seats[i] === null && i > 0) {
+        saida += " =";
+      }
+      else if (this.seats[i] !== null) {
+        saida += " =" + this.seats[i];
+      }
+    }
+    saida += "]";
+    return saida;
+  }
+}
+
+function main() {
+  let chain = new Map();
+  let param: string[] = [];
+  let topic = new Topic(+param[1], +param[2]);
+
+  chain.set("init", () => { topic = new Topic(+param[1], +param[2]) });
+  chain.set("show", () => { console.log(topic.toString()) });
+  chain.set("in", () => { topic.in(new Pass(param[1], +param[2])) });
+  chain.set("out", () => { topic.out((param[1])) });
+
+  evaluate(chain, param);
+}
+
+import { readFileSync } from "fs";
+
+let __lines = readFileSync(0).toString().split("\n");
+let input = () => {
+  let a = __lines.shift();
+  return a === undefined ? "" : a;
+};
+export let write = (text: any) => process.stdout.write("" + text);
+export let puts = (text: any) => console.log(text);
+
+export function evaluate(chain: Map<string, Function>, ui: string[]) {
+  while (true) {
+    let line = input();
+    puts("$" + line);
+    ui.splice(0); //apagar tudo
+    line.split(" ").forEach((x: string) => ui.push(x));
+
+    let cmd = ui[0];
+    if (cmd == "end") {
+      return;
+    } else if (chain.has(cmd)) {
+      chain.get(cmd)!();
+    } else {
+      puts("fail: command not found");
+    }
+  }
+}
+
+
+main()
