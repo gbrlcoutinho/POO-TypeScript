@@ -1,0 +1,198 @@
+class Sistema {
+  alunos: Map<string, Aluno>;
+  turmas: Map<string, Turma>;
+
+  public constructor() {
+    this.alunos = new Map<string, Aluno>();
+    this.turmas = new Map<string, Turma>();
+  }
+
+  public addAluno(idA: string) {
+    this.alunos.set(idA, new Aluno(idA));
+  }
+
+  public addTurma(idT: string) {
+    this.turmas.set(idT, new Turma(idT));
+  }
+
+  public matricular(idA: string, idT: string) {
+    let aluno = this.alunos.get(idA);
+    let turma = this.turmas.get(idT);
+
+    if (aluno && turma) {
+      aluno.addTurmas(turma);
+      turma.addAlunos(aluno);
+    }
+  }
+
+  public desmatricular(idA: string, idT: string) {
+    let aluno = this.alunos.get(idA);
+    let turmas = this.turmas.get(idT);
+    if (aluno && turmas) {
+      aluno.rmTurmas(idT);
+      turmas.rmAlunos(idA);
+    }
+  }
+
+  public removeAluno(idA: string) {
+    let aluno = this.alunos.get(idA);
+    if (aluno) {
+      let turma = aluno.getTurmas();
+      for (let item of turma) {
+        item[1].rmAlunos(idA);
+      }
+    }
+    this.alunos.delete(idA);
+  }
+
+  public removeTurma(idT: string) {
+    let turma = this.turmas.get(idT);
+    if (turma) {
+      let aluno = turma.getAlunos();
+      for (let item of aluno) {
+        item[1].rmTurmas(idT);
+      }
+    }
+    this.turmas.delete(idT);
+  }
+
+  public toString(): string {
+    let saida = "- alunos\n";
+    let alunosOrdenados = new Map([...this.alunos.entries()].sort());
+    let turmasOrdenadas = new Map([...this.turmas.entries()].sort());
+
+    let alunoString = "";
+    for (let elem of alunosOrdenados.entries()) {
+      alunoString += (elem[1].toString() + "\n");
+    }
+
+    let turmaString = "";
+    for (let item of turmasOrdenadas.entries()) {
+      turmaString += "\n" + item[1].toString();
+    }
+
+    saida += alunoString + "- discps" + turmaString;
+    return saida;
+  }
+}
+
+class Aluno {
+  id: string;
+  turmas: Map<string, Turma>;
+
+  public constructor(id: string) {
+    this.id = id;
+    this.turmas = new Map<string, Turma>();
+  }
+
+  public getId(): string {
+    return this.id;
+  }
+
+  public getTurmas(): Map<string, Turma> {
+    return this.turmas;
+  }
+
+  public addTurmas(turmas: Turma) {
+    this.turmas.set(turmas.getId(), turmas);
+  }
+
+  public rmTurmas(idTurmas: string) {
+    this.turmas.delete(idTurmas);
+  }
+
+  public toString(): string {
+    let saida = "";
+    let turmasOrdenadas = [];
+    for (let item of this.turmas) {
+      turmasOrdenadas.push(item[0]);
+    }
+    turmasOrdenadas.sort();
+    saida += this.id + " [" + turmasOrdenadas.join(", ") + "]";
+    return saida;
+  }
+}
+
+class Turma {
+  id: string;
+  alunos: Map<string, Aluno>;
+
+  public constructor(id: string) {
+    this.id = id;
+    this.alunos = new Map<string, Aluno>();
+  }
+
+  public getId(): string {
+    return this.id;
+  }
+
+  public getAlunos(): Map<string, Aluno> {
+    return this.alunos;
+  }
+
+  public addAlunos(alunos: Aluno) {
+    this.alunos.set(alunos.getId(), alunos);
+  }
+
+  public rmAlunos(idTurmas: string) {
+    this.alunos.delete(idTurmas);
+  }
+
+  toString(): string {
+    let saida = "";
+    let aluno = new Map([...this.alunos.entries()].sort());
+    let alunos = []
+    for (let item of aluno) {
+      alunos.push(item[0])
+    }
+    saida += this.id + " [" + alunos.join(", ") + "]";
+    return saida;
+  }
+}
+
+function main() {
+  let chain = new Map();
+  let param: string[] = [];
+  let sistema = new Sistema();
+  chain.set("show", () => puts("" + sistema));
+  chain.set("nwalu", () => { for (let i = 1; i < param.length; i++) { sistema.addAluno((param[i])); } });
+  chain.set("nwdis", () => { for (let i = 1; i < param.length; i++) { sistema.addTurma((param[i])); } });
+  chain.set("tie", () => { for (let i = 2; i < param.length; i++) { sistema.matricular(param[1], param[i]); } });
+  chain.set("untie", () => { for (let i = 2; i < param.length; i++) { sistema.desmatricular(param[1], param[i]); } });
+  chain.set("rmalu", () => { sistema.removeAluno(param[1]) });
+  chain.set("rmdiscp", () => { sistema.removeTurma(param[1]) })
+
+
+  evaluate(chain, param);
+}
+
+import { readFileSync } from "fs";
+import { getSystemErrorName } from "util";
+
+let __lines = readFileSync(0).toString().split("\n");
+let input = () => {
+  let a = __lines.shift();
+  return a === undefined ? "" : a;
+};
+let write = (text: any) => process.stdout.write("" + text);
+let puts = (text: any) => console.log(text);
+
+function evaluate(chain: Map<string, Function>, ui: string[]) {
+  while (true) {
+    let line = input();
+    puts("$" + line);
+    ui.splice(0);
+    line.split(" ").forEach((x: string) => ui.push(x));
+
+    let cmd = ui[0];
+    if (cmd == "end") {
+      return;
+    } else if (chain.has(cmd)) {
+      chain.get(cmd)!();
+    } else {
+      puts("fail: command not found");
+    }
+  }
+}
+
+main()
