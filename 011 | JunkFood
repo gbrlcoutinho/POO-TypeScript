@@ -1,0 +1,166 @@
+class Slots {
+  private name: string;
+  private quantity: number;
+  private price: number;
+
+  public constructor(name: string, quantity: number, price: number) {
+    this.name = name;
+    this.quantity = quantity;
+    this.price = price;
+  }
+
+  public getName(): string {
+    return this.name;
+  }
+
+  public setName(name: string): void {
+    this.name = name;
+  }
+
+  public getPrice(): number {
+    return this.price;
+  }
+
+  public setPrice(price: number): void {
+    this.price = price;
+  }
+
+  public getQuantity(): number {
+    return this.quantity;
+  }
+
+  public setQuantity(quantity: number): void {
+    this.quantity = quantity;
+  }
+
+  public toString(): string {
+    let saida = this.name + " : " + this.quantity + " U : " + this.price.toFixed(2) + " RS";
+    return saida;
+  }
+}
+
+class Machine {
+  private slots: Array<Slots>;
+  private profit: number;
+  private cash: number;
+  private capacity: number;
+
+  public constructor(capacity: number) {
+    this.slots = [];
+    this.profit = 0;
+    this.cash = 0;
+    this.capacity = capacity;
+
+    for (let i = 0; i < this.capacity; i++) {
+      this.slots.push(new Slots("empty", 0, 0));
+    }
+  }
+
+  public getSlots(index: number): Slots {
+    return this.slots[index];
+  }
+
+  public setSlots(index: number, slot: Slots): void {
+    if (index > this.capacity) {
+      console.log("fail: indice nao existe");
+      return;
+    }
+    this.slots[index] = slot;
+  }
+
+  public clearSlots(index: number): void {
+    this.slots[index] = new Slots("empty", 0, 0);
+    return;
+  }
+
+  public insertCash(cash: number): void {
+    this.cash += cash;
+  }
+
+  public getCash(): number {
+    return this.cash;
+  }
+
+  public withDrawCash() {
+    let troco = this.cash;
+    this.cash = 0;
+    return troco;
+  }
+
+  public buyItem(index: number): void {
+    if (index > this.slots.length) {
+      console.log("fail: indice nao existe");
+      return;
+    }
+    if (this.cash < this.slots[index].getPrice()) {
+      console.log("fail: saldo insuficiente");
+      return
+    }
+    if (this.slots[index].getQuantity() === 0) {
+      console.log("fail: espiral sem produtos");
+      return;
+    }
+
+    this.cash -= this.getSlots(index).getPrice();
+    this.slots[index]?.setQuantity(this.slots[index]?.getQuantity() - 1);
+    console.log("voce comprou um " + this.getSlots(index)?.getName());
+  }
+
+  public toString(): string {
+    let saida = "";
+    for (let i = 0; i < this.capacity; i++) {
+      if (i === this.capacity - 1) {
+        saida += i + " [" + this.slots[i] + "]";
+      } else {
+        saida += i + " [" + this.slots[i] + "]" + "\n";
+      }
+    }
+    return "saldo: " + this.cash.toFixed(2) + "\n" + saida;
+  }
+}
+
+function main() {
+  let chain = new Map();
+  let param: string[] = [];
+  let maquina = new Machine(0);
+
+  chain.set("init", () => maquina = new Machine(+param[1]));
+  chain.set("show", () => console.log("" + maquina));
+  chain.set("set", () => maquina.setSlots(+param[1], new Slots(param[2], +param[3], +param[4])))
+  chain.set("limpar", () => maquina.clearSlots(+param[1]));
+  chain.set("dinheiro", () => maquina.insertCash(+param[1]));
+  chain.set("troco", () => console.log("voce recebeu " + maquina.withDrawCash().toFixed(2) + " RS"));
+  chain.set("comprar", () => maquina.buyItem(+param[1]));
+
+  execute(chain, param);
+}
+
+import { readFileSync } from "fs";
+
+let __lines = readFileSync(0).toString().split("\n");
+let input = () => {
+  let a = __lines.shift();
+  return a === undefined ? "" : a;
+};
+let write = (text: any) => process.stdout.write("" + text);
+let puts = (text: any) => console.log(text);
+function execute(chain: Map<string, Function>, param: string[]) {
+  while (true) {
+    let line = input();
+    puts("$" + line);
+    param.splice(0); //apagar tudo
+    line.split(" ").forEach((x: string) => param.push(x));
+
+    let cmd = param[0];
+    if (cmd == "end") {
+      return;
+    } else if (chain.has(cmd)) {
+      chain.get(cmd)!();
+    } else {
+      puts("fail: command not found");
+    }
+  }
+}
+
+
+main()
